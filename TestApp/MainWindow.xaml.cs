@@ -1,14 +1,15 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Controls;
-using System.Collections.Generic;
 
 namespace TestApp
 {
     public partial class MainWindow : Window
     {
-        private List<Question> _questions = new List<Question>();
-        private int _currentQuestionIndex = 0;
-        private int _score = 0;
+        private List<Question> questions = new List<Question>();
+        private int currentQuestionIndex = 0;
+        private int correctAnswers = 0;
+        private bool testInProgress = false;
 
         public MainWindow()
         {
@@ -19,7 +20,7 @@ namespace TestApp
         {
             if (string.IsNullOrWhiteSpace(QuestionTextBox.Text))
             {
-                MessageBox.Show("Введите вопрос!");
+                StatusText.Text = "Введите текст вопроса!";
                 return;
             }
 
@@ -32,58 +33,103 @@ namespace TestApp
                     Option2TextBox.Text,
                     Option3TextBox.Text,
                     Option4TextBox.Text
-                },
-                CorrectAnswerIndex = int.Parse(CorrectAnswerTextBox.Text) - 1
+                }
             };
 
-            _questions.Add(question);
-            StatusText.Text = $"Добавлено вопросов: {_questions.Count}";
-            QuestionTextBox.Clear();
-        }
-
-        private void SubmitAnswer_Click(object sender, RoutedEventArgs e)
-        {
-            if (_questions.Count == 0)
+            if (!int.TryParse(CorrectAnswerTextBox.Text, out int correctIndex) ||
+                correctIndex < 1 || correctIndex > 4)
             {
-                MessageBox.Show("Сначала добавьте вопросы!");
+                StatusText.Text = "Номер правильного ответа должен быть от 1 до 4!";
                 return;
             }
-        
-            int selectedIndex = GetSelectedAnswerIndex();
-            if (selectedIndex == _questions[_currentQuestionIndex].CorrectAnswerIndex)
-                _score++;
 
-       
-            _currentQuestionIndex++;
-            if (_currentQuestionIndex < _questions.Count)
-                ShowQuestion(_currentQuestionIndex);
-            else
-                ShowResult();
+            question.CorrectAnswerIndex = correctIndex - 1; 
+            questions.Add(question);
+
+
+            QuestionTextBox.Clear();
+            Option1TextBox.Text = "Вариант 1";
+            Option2TextBox.Text = "Вариант 2";
+            Option3TextBox.Text = "Вариант 3";
+            Option4TextBox.Text = "Вариант 4";
+            CorrectAnswerTextBox.Text = "1";
+
+            StatusText.Text = $"Добавлено вопросов: {questions.Count}";
         }
 
-        private int GetSelectedAnswerIndex()
+        private void StartTest_Click(object sender, RoutedEventArgs e)
         {
-            if (Answer1Radio.IsChecked == true) return 0;
-            if (Answer2Radio.IsChecked == true) return 1;
-            if (Answer3Radio.IsChecked == true) return 2;
-            return 3;
+            if (questions.Count == 0)
+            {
+                ResultText.Text = "Нет вопросов для тестирования!";
+                return;
+            }
+
+            testInProgress = true;
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
+
+            QuestionGroupBox.Visibility = Visibility.Visible;
+            SubmitButton.Visibility = Visibility.Visible;
+            ResultText.Text = "";
+
+            ShowQuestion(questions[0]);
         }
 
-        private void ShowQuestion(int index)
+        private void ShowQuestion(Question question)
         {
-            var question = _questions[index];
-            CurrentQuestionText.Text = question.Text;
+            CurrentQuestionText.Text = $"{currentQuestionIndex + 1}. {question.Text}";
             Answer1Radio.Content = question.Options[0];
             Answer2Radio.Content = question.Options[1];
             Answer3Radio.Content = question.Options[2];
             Answer4Radio.Content = question.Options[3];
+
+
+            Answer1Radio.IsChecked = Answer2Radio.IsChecked =
+                Answer3Radio.IsChecked = Answer4Radio.IsChecked = false;
         }
 
-        private void ShowResult()
+        private void SubmitAnswer_Click(object sender, RoutedEventArgs e)
         {
-            ResultText.Text = $"Тест завершён! Правильных ответов: {_score} из {_questions.Count}";
-            _currentQuestionIndex = 0;
-            _score = 0;
+            if (!testInProgress) return;
+
+
+            if (!(Answer1Radio.IsChecked ?? false) && !(Answer2Radio.IsChecked ?? false) &&
+                !(Answer3Radio.IsChecked ?? false) && !(Answer4Radio.IsChecked ?? false))
+            {
+                MessageBox.Show("Выберите ответ!", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            int selectedIndex = Answer1Radio.IsChecked == true ? 0 :
+                               Answer2Radio.IsChecked == true ? 1 :
+                               Answer3Radio.IsChecked == true ? 2 : 3;
+
+            if (selectedIndex == questions[currentQuestionIndex].CorrectAnswerIndex)
+            {
+                correctAnswers++;
+            }
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.Count)
+            {
+                ShowQuestion(questions[currentQuestionIndex]);
+            }
+            else
+            {
+                FinishTest();
+            }
+        }
+
+        private void FinishTest()
+        {
+            testInProgress = false;
+            QuestionGroupBox.Visibility = Visibility.Collapsed;
+            SubmitButton.Visibility = Visibility.Collapsed;
+
+            ResultText.Text = $"Тест завершен!\n" +
+                              $"Правильных ответов: {correctAnswers} из {questions.Count}\n" +
+                              $"Результат: {(correctAnswers * 100 / questions.Count)}%";
         }
     }
 }

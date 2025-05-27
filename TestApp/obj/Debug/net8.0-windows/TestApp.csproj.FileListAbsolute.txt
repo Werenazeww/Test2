@@ -12,6 +12,7 @@ D:\Users\Пользователь\Downloads\C# vs\TestApp\TestApp\obj\Debug\net8
 D:\Users\Пользователь\Downloads\C# vs\TestApp\TestApp\obj\Debug\net8.0-windows\TestApp.AssemblyInfoInputs.cache
 D:\Users\Пользователь\Downloads\C# vs\TestApp\TestApp\obj\Debug\net8.0-windows\TestApp.AssemblyInfo.cs
 D:\Users\Пользователь\Downloads\C# vs\TestApp\TestApp\obj\Debug\net8.0-windows\TestApp.csproj.CoreCompileInputs.cache
+D:\Users\Пользователь\Downloads\C# vs\TestApp\TestApp\obj\Debug\net8.0-windows\TestApp.sourcelink.json
 D:\Users\Пользователь\Downloads\C# vs\TestApp\TestApp\obj\Debug\net8.0-windows\TestApp.dll
 D:\Users\Пользователь\Downloads\C# vs\TestApp\TestApp\obj\Debug\net8.0-windows\refint\TestApp.dll
 D:\Users\Пользователь\Downloads\C# vs\TestApp\TestApp\obj\Debug\net8.0-windows\TestApp.pdb
